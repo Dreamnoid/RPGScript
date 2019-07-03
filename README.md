@@ -6,6 +6,7 @@ Be advised: right now, it's only the product of an afternoon of work. RPGScript 
 RPGScript was written with RPG and adventure games in mind. Like most scripting languages for games, it serves two purposes:
 * Defining data
 * Defining simple behavior
+
 Its philosophy is very similar to Lua, as I started writing it as a simpler, flexible and fully-managed replacement for it.
 
 ## Data types
@@ -54,6 +55,7 @@ OnStart =
 }
 ```
 Functions are essentially a list of command calls. Commands are .NET functions defined and exposed by the host application.
+
 Every function call can use its own specific API and global tables, similar to the `setfenv()` feature in Lua.
 
 There's two ways to call a function:
