@@ -137,7 +137,7 @@ namespace RPGScript
 
 		private static void Parse(string line, Source source, Queue<Token> tokens)
 		{
-			var chars = new Queue<char>(line);
+			var chars = new SourceQueue(line);
 			while (chars.Any())
 			{
 				var c = chars.Dequeue();
@@ -257,7 +257,7 @@ namespace RPGScript
 			}
 		}
 
-		private static string ReadDigits(Queue<char> characters)
+		private static string ReadDigits(SourceQueue characters)
 		{
 			var buffer = new StringBuilder();
 			while (characters.Any() && char.IsDigit(characters.Peek()))
@@ -267,7 +267,7 @@ namespace RPGScript
 			return buffer.ToString();
 		}
 
-		private static string ReadLettersOrDigits(Queue<char> characters)
+		private static string ReadLettersOrDigits(SourceQueue characters)
 		{
 			var buffer = new StringBuilder();
 			while (characters.Any() && char.IsLetterOrDigit(characters.Peek()))
@@ -277,11 +277,11 @@ namespace RPGScript
 			return buffer.ToString();
 		}
 
-		private static string ReadString(Queue<char> characters)
+		private static string ReadString(SourceQueue characters)
 		{
 			StringBuilder buffer = new StringBuilder();
 			bool escaped = false;
-			while (characters.Count > 0)
+			while (characters.Any())
 			{
 				var c = characters.Dequeue();
 				if (c == '"' && !escaped)
@@ -305,9 +305,9 @@ namespace RPGScript
 			return buffer.ToString();
 		}
 
-		private static void ReadToEOL(Queue<char> characters)
+		private static void ReadToEOL(SourceQueue characters)
 		{
-			while (characters.Count > 0)
+			while (characters.Any())
 			{
 				var c = characters.Dequeue();
 				if (c == '\r' || c == '\n')
