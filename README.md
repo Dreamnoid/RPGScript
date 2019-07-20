@@ -122,3 +122,6 @@ public static IEnumerable<object> If(List args, FunctionContext ctx)
 
 ## Variables
 Variables exist in RPGScript, but are subject to change, so I won't document them yet.
+
+## Comments
+Only single-line comments are featured. Starting with a `'` character, the rest of the line will be commented out.
