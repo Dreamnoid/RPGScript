@@ -96,12 +96,17 @@ namespace RPGScript
 		public override void Write(StringBuilder sb)
 		{
 			sb.Append(Syntax.StartTable);
+			int i = 0;
 			foreach (var kvp in _values)
 			{
 				sb.Append(kvp.Key);
 				sb.Append(Syntax.Assign);
 				kvp.Value.Write(sb);
-				sb.Append(Syntax.Delimiter);
+				if (i < (_values.Count - 1))
+				{
+					sb.Append(Syntax.Delimiter);
+				}
+				i += 1;
 			}
 			sb.Append(Syntax.EndTable);
 		}
@@ -119,6 +124,11 @@ namespace RPGScript
 			}
 		}
 
+		public static Table Load(string filename)
+		{
+			return Load(filename, new DefaultSourceProvider());
+		}
+
 		public static Table Load(string filename, string fullScript)
 		{
 			return Load(filename, new InMemorySourceProvider(fullScript));
@@ -127,6 +137,13 @@ namespace RPGScript
 		public static Table Load(string filename, ISourceProvider provider)
 		{
 			return Parser.ParseTable(Lexer.Parse(filename, provider), provider);
+		}
+
+		public void Save(string filename)
+		{
+			var sb = new StringBuilder();
+			Write(sb);
+			System.IO.File.WriteAllText(filename, sb.ToString());
 		}
 	}
 }

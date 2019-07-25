@@ -52,10 +52,13 @@ namespace RPGScript
 		public override void Write(StringBuilder sb)
 		{
 			sb.Append(Syntax.StartList);
-			foreach (var value in _values)
+			for(int i = 0; i < _values.Count; ++i)
 			{
-				value.Write(sb);
-				sb.Append(Syntax.Delimiter);
+				_values[i].Write(sb);
+				if (i < (_values.Count - 1))
+				{
+					sb.Append(Syntax.Delimiter);
+				}
 			}
 			sb.Append(Syntax.EndList);
 		}
