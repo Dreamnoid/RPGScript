@@ -44,35 +44,20 @@ namespace RPGScript
 
 		#endregion
 
-		public static List Parse(Queue<Parser.Token> tokens)
+		public void Add(Value value)
 		{
-			var list = new List();
-			tokens.Dequeue<Parser.StartListToken>();
-			while (!tokens.CheckNext<Parser.EndListToken>())
-			{
-				list._values.Add(tokens.DequeueValue());
-				if (!tokens.CheckNext<Parser.DelimiterToken>())
-				{
-					break;
-				}
-				else
-				{
-					tokens.Dequeue<Parser.DelimiterToken>();
-				}
-			}
-			tokens.Dequeue<Parser.EndListToken>();
-			return list;
+			_values.Add(value);
 		}
 
 		public override void Write(StringBuilder sb)
 		{
-			sb.Append(Parser.Syntax.StartList);
+			sb.Append(Syntax.StartList);
 			foreach (var value in _values)
 			{
 				value.Write(sb);
-				sb.Append(Parser.Syntax.Delimiter);
+				sb.Append(Syntax.Delimiter);
 			}
-			sb.Append(Parser.Syntax.EndList);
+			sb.Append(Syntax.EndList);
 		}
 
 		public override bool IsEqual(Value other)

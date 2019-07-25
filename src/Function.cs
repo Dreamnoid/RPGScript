@@ -50,30 +50,30 @@ namespace RPGScript
 			}
 		}
 
-		public static Function Parse(Queue<Parser.Token> tokens)
+		internal static Function Parse(Queue<Token> tokens)
 		{
 			var function = new Function();
-			tokens.Dequeue<Parser.StartFunctionToken>();
-			while (!tokens.CheckNext<Parser.EndFunctionToken>())
+			tokens.Dequeue<Token.StartFunction>();
+			while (!tokens.CheckNext<Token.EndFunction>())
 			{
-				var cmd = tokens.Dequeue<Parser.KeyToken>();
-				var args = List.Parse(tokens);
-				function._ops.Add(new Op() { Cmd = cmd.Key, Args = args });
+				var cmd = tokens.Dequeue<Token.Key>();
+				var args = Parser.ParseList(tokens, null);
+				function._ops.Add(new Op() { Cmd = cmd.Name, Args = args });
 			}
-			tokens.Dequeue<Parser.EndFunctionToken>();
+			tokens.Dequeue<Token.EndFunction>();
 			return function;
 		}
 
 		public override void Write(StringBuilder sb)
 		{
-			sb.Append(Parser.Syntax.StartFunction);
+			sb.Append(Syntax.StartFunction);
 			foreach (var op in _ops)
 			{
 				sb.Append(op.Cmd);
 				op.Args.Write(sb);
 				sb.AppendLine();
 			}
-			sb.Append(Parser.Syntax.EndFunction);
+			sb.Append(Syntax.EndFunction);
 		}
 
 		public override bool IsEqual(Value other)

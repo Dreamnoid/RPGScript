@@ -2,18 +2,6 @@
 
 namespace RPGScript
 {
-	public struct Source
-	{
-		public string File;
-		public int Line;
-
-		public Source(string file, int line) : this()
-		{
-			File = file;
-			Line = line;
-		}
-	}
-
 	public class RuntimeScriptException : Exception
 	{
 		public RuntimeScriptException(string msg) : base(msg) { }

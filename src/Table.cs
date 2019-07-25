@@ -95,15 +95,15 @@ namespace RPGScript
 
 		public override void Write(StringBuilder sb)
 		{
-			sb.Append(Parser.Syntax.StartTable);
+			sb.Append(Syntax.StartTable);
 			foreach (var kvp in _values)
 			{
 				sb.Append(kvp.Key);
-				sb.Append(Parser.Syntax.Assign);
+				sb.Append(Syntax.Assign);
 				kvp.Value.Write(sb);
-				sb.Append(Parser.Syntax.Delimiter);
+				sb.Append(Syntax.Delimiter);
 			}
-			sb.Append(Parser.Syntax.EndTable);
+			sb.Append(Syntax.EndTable);
 		}
 
 		public override bool IsEqual(Value other)
@@ -119,41 +119,14 @@ namespace RPGScript
 			}
 		}
 
-		#region Parse
-
-		public static Table Parse(string filename, byte[] buffer)
+		public static Table Load(string filename, string fullScript)
 		{
-			return Parse(filename, Encoding.UTF8.GetString(buffer));
+			return Load(filename, new InMemorySourceProvider(fullScript));
 		}
 
-		public static Table Parse(string filename, string fullScript)
+		public static Table Load(string filename, ISourceProvider provider)
 		{
-			return Parse(Parser.Parse(filename, fullScript));
+			return Parser.ParseTable(Lexer.Parse(filename, provider), provider);
 		}
-
-		public static Table Parse(Queue<Parser.Token> tokens)
-		{
-			var table = new Table();
-			tokens.Dequeue<Parser.StartTableToken>();
-			while (!tokens.CheckNext<Parser.EndTableToken>())
-			{
-				var key = tokens.Dequeue<Parser.KeyToken>();
-				tokens.Dequeue<Parser.AssignToken>();
-				table._values[key.Key] = tokens.DequeueValue();
-				if (!tokens.CheckNext<Parser.DelimiterToken>())
-				{
-					break;
-				}
-				else
-				{
-					tokens.Dequeue<Parser.DelimiterToken>();
-				}
-			}
-			tokens.Dequeue<Parser.EndTableToken>();
-			return table;
-		}
-
-		#endregion
-
 	}
 }

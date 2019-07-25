@@ -1,254 +1,54 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace RPGScript
 {
-	public static class Parser
+	internal static class Parser
 	{
-		public static class Syntax
+		public static Value DequeueValue(this Queue<Token> tokens, ISourceProvider provider)
 		{
-			public static char StartTable = '[';
-			public static char EndTable = ']';
-			public static char StartList = '(';
-			public static char EndList = ')';
-			public static char StartFunction = '{';
-			public static char EndFunction = '}';
-			public static char Delimiter = ',';
-			public static char KeyDelimiter = '.';
-			public static char Assign = '=';
-			public static char Comment = '\'';
-		}
-
-		public abstract class Token
-		{
-			public Source Source;
-		}
-
-		public class StartTableToken : Token
-		{
-			public override string ToString()
+			if (tokens.CheckNext<Token.Int>())
 			{
-				return Syntax.StartTable.ToString();
-			}
-		}
-
-		public class EndTableToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.EndTable.ToString();
-			}
-		}
-
-		public class StartListToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.StartList.ToString();
-			}
-		}
-
-		public class EndListToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.EndList.ToString();
-			}
-		}
-
-		public class StartFunctionToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.StartFunction.ToString();
-			}
-		}
-
-		public class EndFunctionToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.EndFunction.ToString();
-			}
-		}
-
-		public class DelimiterToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.Delimiter.ToString();
-			}
-		}
-
-		public class AssignToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.Assign.ToString();
-			}
-		}
-
-		public class KeyToken : Token
-		{
-			public string Key;
-			public override string ToString()
-			{
-				return Key;
-			}
-		}
-
-		public class KeyDelimiterToken : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.KeyDelimiter.ToString();
-			}
-		}
-
-		public class IntToken : Token
-		{
-			public int Value;
-			public override string ToString()
-			{
-				return Value.ToString();
-			}
-		}
-
-		public class StringToken : Token
-		{
-			public string Value;
-			public override string ToString()
-			{
-				return Value;
-			}
-		}
-
-		public static Queue<Token> Parse(string filename, string fullScript)
-		{
-			var lines = fullScript.Split('\n');
-			var tokens = new Queue<Token>();
-			for (int i = 0; i < lines.Length; ++i)
-			{
-				Parse(lines[i], new Source(filename, i + 1), tokens);
-			}
-			return tokens;
-		}
-
-		private static void Parse(string line, Source source, Queue<Token> tokens)
-		{
-			var chars = new SourceQueue(line);
-			while (chars.Any())
-			{
-				var c = chars.Dequeue();
-				if (c == Syntax.StartTable)
-				{
-					tokens.Enqueue(new StartTableToken() { Source = source });
-				}
-				else if (c == Syntax.EndTable)
-				{
-					tokens.Enqueue(new EndTableToken() { Source = source });
-				}
-				else if (c == Syntax.StartList)
-				{
-					tokens.Enqueue(new StartListToken() { Source = source });
-				}
-				else if (c == Syntax.EndList)
-				{
-					tokens.Enqueue(new EndListToken() { Source = source });
-				}
-				else if (c == Syntax.StartFunction)
-				{
-					tokens.Enqueue(new StartFunctionToken() { Source = source });
-				}
-				else if (c == Syntax.EndFunction)
-				{
-					tokens.Enqueue(new EndFunctionToken() { Source = source });
-				}
-				else if (c == Syntax.Delimiter)
-				{
-					tokens.Enqueue(new DelimiterToken() { Source = source });
-				}
-				else if (c == Syntax.KeyDelimiter)
-				{
-					tokens.Enqueue(new KeyDelimiterToken() { Source = source });
-				}
-				else if (c == Syntax.Assign)
-				{
-					tokens.Enqueue(new AssignToken() { Source = source });
-				}
-				else if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
-				{
-					// Whitespace
-				}
-				else if (c == Syntax.Comment)
-				{
-					ReadToEOL(chars);
-				}
-				else if (c == '"')
-				{
-					tokens.Enqueue(new StringToken() { Value = ReadString(chars), Source = source });
-				}
-				else if (char.IsDigit(c) || c == '+' || c == '-')
-				{
-					tokens.Enqueue(new IntToken() { Value = int.Parse(c + ReadDigits(chars)), Source = source });
-				}
-				else
-				{
-					var word = c + ReadLettersOrDigits(chars);
-					if (word == "true")
-					{
-						tokens.Enqueue(new IntToken() { Value = 1, Source = source });
-					}
-					else if (word == "false")
-					{
-						tokens.Enqueue(new IntToken() { Value = 0, Source = source });
-					}
-					else
-					{
-						tokens.Enqueue(new KeyToken() { Key = word, Source = source });
-					}
-				}
-			}
-		}
-
-		public static Value DequeueValue(this Queue<Token> tokens)
-		{
-			if (tokens.CheckNext<IntToken>())
-			{
-				var value = tokens.Dequeue<IntToken>();
+				var value = tokens.Dequeue<Token.Int>();
 				return new IntValue(value.Value);
 			}
-			else if (tokens.CheckNext<StringToken>())
+			else if (tokens.CheckNext<Token.String>())
 			{
-				var value = tokens.Dequeue<StringToken>();
+				var value = tokens.Dequeue<Token.String>();
 				return new StringValue(value.Value);
 			}
-			else if (tokens.CheckNext<StartTableToken>())
+			else if (tokens.CheckNext<Token.StartTable>())
 			{
-				var value = Table.Parse(tokens);
-				return value;
+				return ParseTable(tokens, provider);
 			}
-			else if (tokens.CheckNext<StartListToken>())
+			else if (tokens.CheckNext<Token.StartList>())
 			{
-				var value = List.Parse(tokens);
-				return value;
+				return ParseList(tokens, provider);
 			}
-			else if (tokens.CheckNext<StartFunctionToken>())
+			else if (tokens.CheckNext<Token.StartFunction>())
 			{
 				var value = Function.Parse(tokens);
 				return value;
 			}
-			else if (tokens.CheckNext<KeyToken>())
+			else if (tokens.CheckNext<Token.Key>())
 			{
 				var parts = new List<string>();
-				parts.Add(tokens.Dequeue<KeyToken>().Key);
-				while (tokens.CheckNext<KeyDelimiterToken>())
+				parts.Add(tokens.Dequeue<Token.Key>().Name);
+				while (tokens.CheckNext<Token.KeyDelimiter>())
 				{
-					tokens.Dequeue<KeyDelimiterToken>();
-					parts.Add(tokens.Dequeue<KeyToken>().Key);
+					tokens.Dequeue<Token.KeyDelimiter>();
+					parts.Add(tokens.Dequeue<Token.Key>().Name);
 				}
 				return new Variable(parts.ToArray());
+			}
+			else if (tokens.CheckNext<Token.At>())
+			{
+				if (provider == null)
+				{
+					throw new ParserScriptException("Trying to import a file when no source provider was specified", tokens.Peek().Source);
+				}
+				tokens.Dequeue<Token.At>();
+				var value = tokens.Dequeue<Token.String>();
+				return Table.Load(value.Value, provider);
 			}
 			else
 			{
@@ -257,74 +57,63 @@ namespace RPGScript
 			}
 		}
 
-		private static string ReadDigits(SourceQueue characters)
+		public static Table ParseTable(Queue<Token> tokens, ISourceProvider provider)
 		{
-			var buffer = new StringBuilder();
-			while (characters.Any() && char.IsDigit(characters.Peek()))
+			var table = new Table();
+			tokens.Dequeue<Token.StartTable>();
+			while (!tokens.CheckNext<Token.EndTable>())
 			{
-				buffer.Append(characters.Dequeue());
-			}
-			return buffer.ToString();
-		}
-
-		private static string ReadLettersOrDigits(SourceQueue characters)
-		{
-			var buffer = new StringBuilder();
-			while (characters.Any() && char.IsLetterOrDigit(characters.Peek()))
-			{
-				buffer.Append(characters.Dequeue());
-			}
-			return buffer.ToString();
-		}
-
-		private static string ReadString(SourceQueue characters)
-		{
-			StringBuilder buffer = new StringBuilder();
-			bool escaped = false;
-			while (characters.Any())
-			{
-				var c = characters.Dequeue();
-				if (c == '"' && !escaped)
+				var key = tokens.Dequeue<Token.Key>();
+				tokens.Dequeue<Token.Assign>();
+				table.Set(key.Name, tokens.DequeueValue(provider));
+				if (!tokens.CheckNext<Token.Delimiter>())
 				{
 					break;
 				}
-				if (c == '\\' && !escaped)
+				else
 				{
-					escaped = true;
+					tokens.Dequeue<Token.Delimiter>();
 				}
-				else if (c == 'n' && escaped)
+			}
+			tokens.Dequeue<Token.EndTable>();
+			return table;
+		}
+
+		public static List ParseList(Queue<Token> tokens, ISourceProvider provider)
+		{
+			var list = new List();
+			tokens.Dequeue<Token.StartList>();
+			while (!tokens.CheckNext<Token.EndList>())
+			{
+				list.Add(tokens.DequeueValue(provider));
+				if (!tokens.CheckNext<Token.Delimiter>())
 				{
-					buffer.Append('\n');
+					break;
 				}
 				else
 				{
-					escaped = false;
-					buffer.Append(c);
+					tokens.Dequeue<Token.Delimiter>();
 				}
 			}
-			return buffer.ToString();
-		}
-
-		private static void ReadToEOL(SourceQueue characters)
-		{
-			while (characters.Any())
-			{
-				var c = characters.Dequeue();
-				if (c == '\r' || c == '\n')
-				{
-					return;
-				}
-			}
+			tokens.Dequeue<Token.EndList>();
+			return list;
 		}
 
 		public static TToken Dequeue<TToken>(this Queue<Token> tokens) where TToken : Token
 		{
-			var token = tokens.Dequeue();
-			if (!(token is TToken))
+			if (tokens.Count > 0)
 			{
-				throw new ParserScriptException(string.Format("Expected {0}, received '{1}'", typeof(TToken).Name, token.ToString()), token.Source); 
+				var token = tokens.Dequeue();
+				if (!(token is TToken))
+				{
+					throw new ParserScriptException(string.Format("Expected {0}, received '{1}'", typeof(TToken).Name, token.ToString()), token.Source);
+				}
+				return ((TToken)token);
 			}
-			return ((TToken)token);
+			else
+			{
+				throw new ParserScriptException(string.Format("Expected {0}, received EOF", typeof(TToken).Name), new Source());
+			}
 		}
 
 		public static bool CheckNext<TToken>(this Queue<Token> tokens) where TToken : Token
