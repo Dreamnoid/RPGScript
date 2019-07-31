@@ -18,7 +18,14 @@ namespace RPGScript
 
 		public void Set(string key, string value)
 		{
-			_values[key] = new StringValue(value);
+			if (value != null)
+			{
+				_values[key] = new StringValue(value);
+			}
+			else if (_values.ContainsKey(key))
+			{
+				_values.Remove(key);
+			}
 		}
 
 		public void Set(string key, bool value)

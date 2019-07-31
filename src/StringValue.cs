@@ -18,7 +18,7 @@ namespace RPGScript
 
 		public override void Write(StringBuilder sb)
 		{
-			sb.Append("\"").Append(_value.Replace("\"", "\\\"")).Append("\"");
+			sb.Append("\"").Append(_value.Replace("\\", "\\\\").Replace("\"", "\\\"")).Append("\"");
 		}
 
 		public override string ToString()
