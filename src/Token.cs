@@ -94,6 +94,15 @@
 			}
 		}
 
+		public class Double : Token
+		{
+			public double Value;
+			public override string ToString()
+			{
+				return Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			}
+		}
+
 		public class String : Token
 		{
 			public string Value;

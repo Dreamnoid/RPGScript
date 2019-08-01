@@ -16,6 +16,16 @@ namespace RPGScript
 			_values[key] = new IntValue(value);
 		}
 
+		public void Set(string key, double value)
+		{
+			_values[key] = new DoubleValue(value);
+		}
+
+		public void Set(string key, float value)
+		{
+			_values[key] = new DoubleValue(value);
+		}
+
 		public void Set(string key, string value)
 		{
 			if (value != null)
@@ -45,6 +55,16 @@ namespace RPGScript
 		public int GetInt(string key, int def)
 		{
 			return (GetValue(key) is IntValue value) ? value : def;
+		}
+
+		public float GetFloat(string key, float def)
+		{
+			return (GetValue(key) is DoubleValue value) ? value : (GetValue(key) is IntValue ivalue) ? ivalue : def;
+		}
+
+		public double GetDouble(string key, double def)
+		{
+			return (GetValue(key) is DoubleValue value) ? value : (GetValue(key) is IntValue ivalue) ? ivalue : def;
 		}
 
 		public string GetString(string key, string def)

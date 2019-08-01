@@ -11,6 +11,11 @@ namespace RPGScript
 				var value = tokens.Dequeue<Token.Int>();
 				return new IntValue(value.Value);
 			}
+			else if (tokens.CheckNext<Token.Double>())
+			{
+				var value = tokens.Dequeue<Token.Double>();
+				return new DoubleValue(value.Value);
+			}
 			else if (tokens.CheckNext<Token.String>())
 			{
 				var value = tokens.Dequeue<Token.String>();

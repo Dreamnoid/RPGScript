@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace RPGScript
@@ -77,7 +78,16 @@ namespace RPGScript
 				}
 				else if (char.IsDigit(c) || c == '+' || c == '-')
 				{
-					tokens.Enqueue(new Token.Int() { Value = int.Parse(c + ReadDigits(chars)), Source = source });
+					var result = ReadDigits(chars);
+					var number = c + result.String;
+					if (result.IsDouble)
+					{
+						tokens.Enqueue(new Token.Double() { Value = double.Parse(number), Source = source });
+					}
+					else
+					{
+						tokens.Enqueue(new Token.Int() { Value = int.Parse(number), Source = source });
+					}
 				}
 				else
 				{
@@ -98,14 +108,22 @@ namespace RPGScript
 			}
 		}
 
-		private static string ReadDigits(SourceQueue characters)
+		private struct DigitsParsingResult
+		{
+			public string String;
+			public bool IsDouble;
+		}
+		private static DigitsParsingResult ReadDigits(SourceQueue characters)
 		{
 			var buffer = new StringBuilder();
-			while (characters.Any() && char.IsDigit(characters.Peek()))
+			int separatorsBudget = 1;
+			while (characters.Any() && (char.IsDigit(characters.Peek()) || ((separatorsBudget > 0) && (characters.Peek() == '.'))))
 			{
-				buffer.Append(characters.Dequeue());
+				var c = characters.Dequeue();
+				buffer.Append(c);
+				if (c == '.') separatorsBudget -= 1;
 			}
-			return buffer.ToString();
+			return new DigitsParsingResult() { String = buffer.ToString(), IsDouble = (separatorsBudget == 0) };
 		}
 
 		private static string ReadLettersOrDigits(SourceQueue characters)
