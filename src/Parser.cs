@@ -6,15 +6,10 @@ namespace RPGScript
 	{
 		public static Value DequeueValue(this Queue<Token> tokens, ISourceProvider provider)
 		{
-			if (tokens.CheckNext<Token.Int>())
+			if (tokens.CheckNext<Token.Number>())
 			{
-				var value = tokens.Dequeue<Token.Int>();
-				return new IntValue(value.Value);
-			}
-			else if (tokens.CheckNext<Token.Double>())
-			{
-				var value = tokens.Dequeue<Token.Double>();
-				return new DoubleValue(value.Value);
+				var value = tokens.Dequeue<Token.Number>();
+				return new NumericValue(value.Value);
 			}
 			else if (tokens.CheckNext<Token.String>())
 			{

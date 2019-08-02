@@ -13,17 +13,17 @@ namespace RPGScript
 
 		public void Set(string key, int value)
 		{
-			_values[key] = new IntValue(value);
+			_values[key] = new NumericValue(value);
 		}
 
 		public void Set(string key, double value)
 		{
-			_values[key] = new DoubleValue(value);
+			_values[key] = new NumericValue(value);
 		}
 
 		public void Set(string key, float value)
 		{
-			_values[key] = new DoubleValue(value);
+			_values[key] = new NumericValue(value);
 		}
 
 		public void Set(string key, string value)
@@ -40,7 +40,7 @@ namespace RPGScript
 
 		public void Set(string key, bool value)
 		{
-			_values[key] = new IntValue(value);
+			_values[key] = new NumericValue(value);
 		}
 
 		public void Set(string key, Value value)
@@ -54,17 +54,17 @@ namespace RPGScript
 
 		public int GetInt(string key, int def)
 		{
-			return (GetValue(key) is IntValue value) ? value : def;
+			return (GetValue(key) is NumericValue value) ? value : def;
 		}
 
 		public float GetFloat(string key, float def)
 		{
-			return (GetValue(key) is DoubleValue value) ? value : (GetValue(key) is IntValue ivalue) ? ivalue : def;
+			return (GetValue(key) is NumericValue value) ? value : def;
 		}
 
 		public double GetDouble(string key, double def)
 		{
-			return (GetValue(key) is DoubleValue value) ? value : (GetValue(key) is IntValue ivalue) ? ivalue : def;
+			return (GetValue(key) is NumericValue value) ? value : def;
 		}
 
 		public string GetString(string key, string def)
@@ -75,7 +75,7 @@ namespace RPGScript
 
 		public bool GetBool(string key, bool def)
 		{
-			return (GetValue(key) is IntValue value) ? value : def;
+			return (GetValue(key) is NumericValue value) ? value : def;
 		}
 
 		public Table GetTable(string key)

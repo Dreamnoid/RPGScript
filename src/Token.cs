@@ -85,16 +85,7 @@
 			}
 		}
 
-		public class Int : Token
-		{
-			public int Value;
-			public override string ToString()
-			{
-				return Value.ToString();
-			}
-		}
-
-		public class Double : Token
+		public class Number : Token
 		{
 			public double Value;
 			public override string ToString()

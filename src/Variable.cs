@@ -35,7 +35,7 @@ namespace RPGScript
 
 		public void Set(Table globals, int value)
 		{
-			Set(globals, (Value)new IntValue(value));
+			Set(globals, (Value)new NumericValue(value));
 		}
 
 		public void Set(Table globals, string value)
@@ -45,7 +45,7 @@ namespace RPGScript
 
 		public void Set(Table globals, bool value)
 		{
-			Set(globals, (Value)new IntValue(value));
+			Set(globals, (Value)new NumericValue(value));
 		}
 
 		public void Set(Table globals, Value value)
@@ -72,7 +72,7 @@ namespace RPGScript
 
 		public int GetInt(Table globals, int def)
 		{
-			return (Get(globals) as IntValue) ?? def;
+			return (Get(globals) as NumericValue) ?? def;
 		}
 
 		public string GetString(Table globals, string def)

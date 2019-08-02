@@ -25,22 +25,22 @@ namespace RPGScript
 
 		public int GetInt(int index, int def)
 		{
-			return (GetValue(index) is IntValue value) ? value : def;
+			return (GetValue(index) is NumericValue value) ? value : def;
 		}
 
 		public float GetFloat(int index, float def)
 		{
-			return (GetValue(index) is DoubleValue value) ? value : def;
+			return (GetValue(index) is NumericValue value) ? value : def;
 		}
 
 		public double GetDouble(int index, double def)
 		{
-			return (GetValue(index) is DoubleValue value) ? value : def;
+			return (GetValue(index) is NumericValue value) ? value : def;
 		}
 
 		public bool GetBool(int index, bool def)
 		{
-			return (GetValue(index) is IntValue value) ? value : def;
+			return (GetValue(index) is NumericValue value) ? value : def;
 		}
 
 		public Value GetValue(int index)
