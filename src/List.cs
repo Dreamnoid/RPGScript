@@ -23,6 +23,11 @@ namespace RPGScript
 			return GetValue(index) as Table;
 		}
 
+		public List GetList(int index)
+		{
+			return GetValue(index) as List;
+		}
+
 		public int GetInt(int index, int def)
 		{
 			return (GetValue(index) is NumericValue value) ? value : def;
