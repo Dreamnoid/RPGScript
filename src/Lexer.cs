@@ -140,6 +140,7 @@ namespace RPGScript
 				else if (c == 'n' && escaped)
 				{
 					buffer.Append('\n');
+					escaped = false;
 				}
 				else
 				{
