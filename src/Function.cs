@@ -80,5 +80,20 @@ namespace RPGScript
 		{
 			return (this == other);
 		}
+
+		public static Function Load(string filename)
+		{
+			return Load(filename, new DefaultSourceProvider());
+		}
+
+		public static Function Load(string filename, string fullScript)
+		{
+			return Load(filename, new InMemorySourceProvider(fullScript));
+		}
+
+		public static Function Load(string filename, ISourceProvider provider)
+		{
+			return Function.Parse(Lexer.Parse(filename, provider));
+		}
 	}
 }
