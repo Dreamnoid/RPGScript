@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace RPGScript
@@ -28,14 +29,14 @@ namespace RPGScript
 			}
 		}
 
-		internal static Function Parse(Queue<Token> tokens)
+		internal static Function Parse(Queue<Token> tokens, Preprocessor preprocessor)
 		{
 			var function = new Function();
 			tokens.Dequeue<Token.StartFunction>();
 			while (!tokens.CheckNext<Token.EndFunction>())
 			{
 				var cmd = tokens.Dequeue<Token.Identifier>();
-				var args = Parser.ParseList(tokens, null);
+				var args = Parser.ParseList(tokens, preprocessor);
 				function._commands.Add(new Command() { Identifier = cmd.Name, Args = args });
 			}
 			tokens.Dequeue<Token.EndFunction>();
@@ -59,19 +60,14 @@ namespace RPGScript
 			return (this == other);
 		}
 
-		public static Function Load(string filename)
+		public static Function Load(string filename, string fullScript, Preprocessor preprocessor)
 		{
-			return Load(filename, new DefaultSourceProvider());
+			return Parse(Lexer.Parse(fullScript, filename), preprocessor);
 		}
 
-		public static Function Load(string filename, string fullScript)
+		public static Function Load(string filename, Preprocessor preprocessor)
 		{
-			return Load(filename, new InMemorySourceProvider(fullScript));
-		}
-
-		public static Function Load(string filename, ISourceProvider provider)
-		{
-			return Parse(Lexer.Parse(filename, provider));
+			return Load(filename, File.ReadAllText(filename), preprocessor);
 		}
 	}
 }

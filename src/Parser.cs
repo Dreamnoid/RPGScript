@@ -4,7 +4,7 @@ namespace RPGScript
 {
 	internal static class Parser
 	{
-		public static Value DequeueValue(this Queue<Token> tokens, ISourceProvider provider)
+		public static Value DequeueValue(this Queue<Token> tokens, Preprocessor preprocessor)
 		{
 			if (tokens.CheckNext<Token.Number>())
 			{
@@ -18,58 +18,70 @@ namespace RPGScript
 			}
 			else if (tokens.CheckNext<Token.StartTable>())
 			{
-				return ParseTable(tokens, provider);
+				return ParseTable(tokens, preprocessor);
 			}
 			else if (tokens.CheckNext<Token.StartList>())
 			{
-				return ParseList(tokens, provider);
+				return ParseList(tokens, preprocessor);
 			}
 			else if (tokens.CheckNext<Token.StartFunction>())
 			{
-				var value = Function.Parse(tokens);
+				var value = Function.Parse(tokens, preprocessor);
 				return value;
 			}
 			else if (tokens.CheckNext<Token.VariablePrefix>())
-            {
-                tokens.Dequeue<Token.VariablePrefix>();
-                var parts = new List<string>();
-                parts.Add(tokens.Dequeue<Token.Identifier>().Name);
-                while (tokens.CheckNext<Token.KeyDelimiter>())
-                {
-                    tokens.Dequeue<Token.KeyDelimiter>();
-                    parts.Add(tokens.Dequeue<Token.Identifier>().Name);
-                }
-                return new Variable(parts.ToArray());
-            }
-			else if (tokens.CheckNext<Token.At>())
 			{
-				if (provider == null)
+				tokens.Dequeue<Token.VariablePrefix>();
+				var parts = new List<string>();
+				parts.Add(tokens.Dequeue<Token.Identifier>().Name);
+				while (tokens.CheckNext<Token.KeyDelimiter>())
 				{
-					throw new ParserScriptException("Trying to import a file when no source provider was specified", tokens.Peek().Source);
+					tokens.Dequeue<Token.KeyDelimiter>();
+					parts.Add(tokens.Dequeue<Token.Identifier>().Name);
 				}
-				tokens.Dequeue<Token.At>();
-				var value = tokens.Dequeue<Token.String>();
-				return Table.Load(value.Value, provider);
+				return new Variable(parts.ToArray());
 			}
-            else if (tokens.CheckNext<Token.Identifier>())
-            {
-                return ParseExpression(tokens, provider);
-            }
+			else if (tokens.CheckNext<Token.MacroPrefix>())
+			{
+				tokens.Dequeue<Token.MacroPrefix>();
+				var identifier = tokens.Dequeue<Token.Identifier>();
+				var args = new List();
+				tokens.Dequeue<Token.StartList>();
+				while (!tokens.CheckNext<Token.EndList>())
+				{
+					args.Add(tokens.DequeueValue(preprocessor));
+					if (!tokens.CheckNext<Token.Delimiter>())
+					{
+						break;
+					}
+					else
+					{
+						tokens.Dequeue<Token.Delimiter>();
+					}
+				}
+				tokens.Dequeue<Token.EndList>();
+				var macro = preprocessor.GetMacro(identifier.Name, identifier.Source);
+				return macro(args, preprocessor);
+			}
+			else if (tokens.CheckNext<Token.Identifier>())
+			{
+				return ParseExpression(tokens, preprocessor);
+			}
 			else
 			{
 				var token = tokens.Peek();
-                throw new ParserScriptException($"{token.GetType().Name} is not a value", token.Source);
-            }
+				throw new ParserScriptException($"{token.GetType().Name} is not a value", token.Source);
+			}
 		}
 
-        private static Expression ParseExpression(Queue<Token> tokens, ISourceProvider provider)
+        private static Expression ParseExpression(Queue<Token> tokens, Preprocessor preprocessor)
         {
             var identifier = tokens.Dequeue<Token.Identifier>();
             var expression = new Expression(identifier.Name);
             tokens.Dequeue<Token.StartList>();
             while (!tokens.CheckNext<Token.EndList>())
             {
-                expression.Arguments.Add(tokens.DequeueValue(provider));
+                expression.Arguments.Add(tokens.DequeueValue(preprocessor));
 				if (!tokens.CheckNext<Token.Delimiter>())
 				{
 					break;
@@ -83,7 +95,7 @@ namespace RPGScript
             return expression;
         }
 
-        public static Table ParseTable(Queue<Token> tokens, ISourceProvider provider)
+        public static Table ParseTable(Queue<Token> tokens, Preprocessor preprocessor)
 		{
 			var table = new Table();
 			tokens.Dequeue<Token.StartTable>();
@@ -91,7 +103,7 @@ namespace RPGScript
 			{
 				var key = tokens.Dequeue<Token.Identifier>();
 				tokens.Dequeue<Token.Assign>();
-				table.Set(key.Name, tokens.DequeueValue(provider));
+				table.Set(key.Name, tokens.DequeueValue(preprocessor));
 				if (!tokens.CheckNext<Token.Delimiter>())
 				{
 					break;
@@ -105,13 +117,13 @@ namespace RPGScript
 			return table;
 		}
 
-		public static List ParseList(Queue<Token> tokens, ISourceProvider provider)
+		public static List ParseList(Queue<Token> tokens, Preprocessor preprocessor)
 		{
 			var list = new List();
 			tokens.Dequeue<Token.StartList>();
 			while (!tokens.CheckNext<Token.EndList>())
 			{
-				list.Add(tokens.DequeueValue(provider));
+				list.Add(tokens.DequeueValue(preprocessor));
 				if (!tokens.CheckNext<Token.Delimiter>())
 				{
 					break;

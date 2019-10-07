@@ -103,14 +103,6 @@
 			}
 		}
 
-		public class At : Token
-		{
-			public override string ToString()
-			{
-				return Syntax.At.ToString();
-			}
-        }
-
         public class VariablePrefix : Token
         {
             public override string ToString()
@@ -118,5 +110,13 @@
                 return Syntax.VariablePrefix.ToString();
             }
         }
-    }
+
+		public class MacroPrefix : Token
+		{
+			public override string ToString()
+			{
+				return Syntax.MacroPrefix.ToString();
+			}
+		}
+	}
 }

@@ -5,9 +5,8 @@ namespace RPGScript
 {
 	internal static class Lexer
 	{
-		public static Queue<Token> Parse(string filename, ISourceProvider provider)
+		public static Queue<Token> Parse(string fullScript, string filename)
 		{
-			var fullScript = provider.GetSource(filename);
 			var lines = fullScript.Split('\n');
 			var tokens = new Queue<Token>();
 			for (int i = 0; i < lines.Length; ++i)
@@ -59,11 +58,11 @@ namespace RPGScript
 				{
 					tokens.Enqueue(new Token.Assign() { Source = source });
 				}
-				else if (c == Syntax.At)
+				else if (c == Syntax.MacroPrefix)
 				{
-					tokens.Enqueue(new Token.At() { Source = source });
+					tokens.Enqueue(new Token.MacroPrefix() { Source = source });
 				}
-                else if (c == Syntax.VariablePrefix)
+				else if (c == Syntax.VariablePrefix)
                 {
                     tokens.Enqueue(new Token.VariablePrefix() { Source = source });
                 }

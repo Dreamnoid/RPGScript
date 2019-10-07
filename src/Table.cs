@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace RPGScript
@@ -151,26 +152,21 @@ namespace RPGScript
 			}
 		}
 
-		public static Table Load(string filename)
+		public static Table Load(string filename, Preprocessor preprocessor)
 		{
-			return Load(filename, new DefaultSourceProvider());
+			return Load(filename, File.ReadAllText(filename), preprocessor);
 		}
 
-		public static Table Load(string filename, string fullScript)
+		public static Table Load(string filename, string fullScript, Preprocessor preprocessor)
 		{
-			return Load(filename, new InMemorySourceProvider(fullScript));
-		}
-
-		public static Table Load(string filename, ISourceProvider provider)
-		{
-			return Parser.ParseTable(Lexer.Parse(filename, provider), provider);
+			return Parser.ParseTable(Lexer.Parse(fullScript, filename), preprocessor);
 		}
 
 		public void Save(string filename)
 		{
 			var sb = new StringBuilder();
 			Write(sb);
-			System.IO.File.WriteAllText(filename, sb.ToString());
+			File.WriteAllText(filename, sb.ToString());
 		}
 	}
 }
