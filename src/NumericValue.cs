@@ -45,8 +45,8 @@ namespace RPGScript
 		{
 			return (v._value > 0);
 		}
-
-		public override void Write(StringBuilder sb)
+        
+        public override void Write(StringBuilder sb)
 		{
 			sb.Append(_value);
 		}
@@ -60,5 +60,9 @@ namespace RPGScript
 		{
 			return ((other is NumericValue) && (((NumericValue)other)._value == _value));
 		}
-	}
+
+        public override bool AsBool() => (_value > 0);
+
+        public override double AsNumeric() => _value;
+    }
 }

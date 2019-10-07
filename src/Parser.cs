@@ -29,17 +29,18 @@ namespace RPGScript
 				var value = Function.Parse(tokens);
 				return value;
 			}
-			else if (tokens.CheckNext<Token.Key>())
-			{
-				var parts = new List<string>();
-				parts.Add(tokens.Dequeue<Token.Key>().Name);
-				while (tokens.CheckNext<Token.KeyDelimiter>())
-				{
-					tokens.Dequeue<Token.KeyDelimiter>();
-					parts.Add(tokens.Dequeue<Token.Key>().Name);
-				}
-				return new Variable(parts.ToArray());
-			}
+			else if (tokens.CheckNext<Token.VariablePrefix>())
+            {
+                tokens.Dequeue<Token.VariablePrefix>();
+                var parts = new List<string>();
+                parts.Add(tokens.Dequeue<Token.Identifier>().Name);
+                while (tokens.CheckNext<Token.KeyDelimiter>())
+                {
+                    tokens.Dequeue<Token.KeyDelimiter>();
+                    parts.Add(tokens.Dequeue<Token.Identifier>().Name);
+                }
+                return new Variable(parts.ToArray());
+            }
 			else if (tokens.CheckNext<Token.At>())
 			{
 				if (provider == null)
@@ -50,20 +51,37 @@ namespace RPGScript
 				var value = tokens.Dequeue<Token.String>();
 				return Table.Load(value.Value, provider);
 			}
+            else if (tokens.CheckNext<Token.Identifier>())
+            {
+                return ParseExpression(tokens, provider);
+            }
 			else
 			{
 				var token = tokens.Peek();
-				throw new ParserScriptException(string.Format("{0} is not a value", token.GetType().Name), token.Source);
-			}
+                throw new ParserScriptException($"{token.GetType().Name} is not a value", token.Source);
+            }
 		}
 
-		public static Table ParseTable(Queue<Token> tokens, ISourceProvider provider)
+        private static Expression ParseExpression(Queue<Token> tokens, ISourceProvider provider)
+        {
+            var identifier = tokens.Dequeue<Token.Identifier>();
+            var expression = new Expression(identifier.Name);
+            tokens.Dequeue<Token.StartList>();
+            while (!tokens.CheckNext<Token.EndList>())
+            {
+                expression.Arguments.Add(tokens.DequeueValue(provider));
+            }
+            tokens.Dequeue<Token.EndList>();
+            return expression;
+        }
+
+        public static Table ParseTable(Queue<Token> tokens, ISourceProvider provider)
 		{
 			var table = new Table();
 			tokens.Dequeue<Token.StartTable>();
 			while (!tokens.CheckNext<Token.EndTable>())
 			{
-				var key = tokens.Dequeue<Token.Key>();
+				var key = tokens.Dequeue<Token.Identifier>();
 				tokens.Dequeue<Token.Assign>();
 				table.Set(key.Name, tokens.DequeueValue(provider));
 				if (!tokens.CheckNext<Token.Delimiter>())

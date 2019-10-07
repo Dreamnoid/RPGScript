@@ -4,7 +4,7 @@ using System.Text;
 namespace RPGScript
 {
 	public class Variable : Value
-	{
+    {
 		private readonly string[] _parts;
 
 		public Variable(string[] parts)
@@ -28,7 +28,9 @@ namespace RPGScript
 			return false;
 		}
 
-		public override void Write(StringBuilder sb)
+        public override Value Evaluate(Runtime runtime) => Get(runtime.Globals).Evaluate(runtime);
+
+        public override void Write(StringBuilder sb)
 		{
 			sb.Append(string.Join(".", _parts));
 		}

@@ -19,5 +19,6 @@ namespace RPGScript
 		public static char Assign = '=';
 		public static char Comment = '\'';
 		public static char At = '@';
-	}
+        public static char VariablePrefix = '$';
+    }
 }

@@ -68,7 +68,7 @@
 			}
 		}
 
-		public class Key : Token
+		public class Identifier : Token
 		{
 			public string Name;
 			public override string ToString()
@@ -109,6 +109,14 @@
 			{
 				return Syntax.At.ToString();
 			}
-		}
-	}
+        }
+
+        public class VariablePrefix : Token
+        {
+            public override string ToString()
+            {
+                return Syntax.VariablePrefix.ToString();
+            }
+        }
+    }
 }

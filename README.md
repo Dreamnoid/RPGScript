@@ -1,6 +1,6 @@
 # RPGScript
 A very simple scripting language, written in C# and embeddable in .NET applications (Framework or Core).
-Be advised: right now, it's only the product of an afternoon of work. RPGScript is probably not ready for production.
+Be advised: RPGScript is a hobby project and is probably not ready for production.
 
 ## Uses
 RPGScript was written with RPG and adventure games in mind. Like most scripting languages for games, it serves two purposes:
@@ -15,6 +15,7 @@ The following data types are supported:
 * Strings
 * Lists (a simple collection of values)
 * Tables (a key/value dictionary. Keys are strings, values can be anything in this list)
+* Expressions
 * Functions
 
 ## Tables
@@ -46,6 +47,27 @@ Lists are pretty much like tables, without the keys. They are declared between `
 Party = ( [ Name = "Alex" , HP = 100, MP = 20 ] , [ Name = "Brian" , HP = 150, MP = 5 ] )
 ```
 
+## Expressions
+Expressions are special values that can be evaluated at runtime.
+
+The simplest expression is a 'variable': a path relative to the global table. Variables start with a `$` prefix:
+``` C
+Msg($Save.Player.Name)
+```
+At runtime, when the `Msg` command is called, the variable will be replaced by the value yielded by `globalTable.GetTable("Save").GetTable("Player").GetValue("Name")`.
+
+More complex expressions exist, mainly unary and binary expressions:
+``` C
+PlayerIsAlive = Not(Equals($Save.Player.HP, 0))
+```
+They can the be evaluated at runtime, from the host application:
+``` csharp
+if(table.GetExpression("PlayerIsAlive").Evaluate(runtime).AsBool())
+{
+	// Player is alive!
+}
+```
+
 ## Functions
 Functions are first-class citizens in RPGScript. They are declared between `{` and `}`:
 ``` C
@@ -56,20 +78,9 @@ OnStart =
 ```
 Functions are essentially a list of command calls. Commands are .NET functions defined and exposed by the host application.
 
-Every function call can use its own specific API and global tables, similar to the `setfenv()` feature in Lua.
+Every function call can use its own specific API and global table, similar to the `setfenv()` feature in Lua.
 
-There's two ways to call a function:
-* Evaluation
-* Execution
-
-Evaluation calls every commands and check the `BoolFlag` at the end of the execution. Exemple:
-``` C
-Condition = { Equals(Temp.Choice, 0) }
-```
-(There's no stack in RPGScript (yet), so the `BoolFlag` acts as a kind of register.)
-
-On the other hand, execution does not return a result.
-It simply calls the commands sequentially, but allow yielding from the C# code.
+Executing a function simply calls the commands sequentially, but allow yielding from the C# code.
 Exemple:
 ``` C
 OnTalk = 
@@ -77,7 +88,7 @@ OnTalk =
 	ShowDB()
 	Print("Hello, do you like RPGScript?")
 	Choice("Yes","No")
-	If({Equals(Temp.Choice, 0)},
+	If(Equals($Temp.Choice, 0),
 	{
 		Print("Yes!!")
 	},
@@ -89,39 +100,7 @@ OnTalk =
 ```
 Here, the `ShowDB`, `HideDB`, `Print` and `Choice` commands yield while the host application animates the dialog box and wait for user input.
 
-As you can see from the previous sample, RPGScript does not yet support branching, or loops. It may come later.
-But right now, you can write a simple `If` command this way:
-``` C#
-public static IEnumerable<object> If(List args, FunctionContext ctx)
-{
-	var condition = (Function)args.GetValue(0);
-	var trueBlock = args.GetValue(1) as Function;
-	var falseBlock = args.GetValue(2) as Function;
-	if (condition.Evaluate(ctx))
-	{
-		if (trueBlock != null)
-		{
-			foreach (var op in trueBlock.Execute(ctx))
-			{
-				yield return (op;
-			}
-		}
-	}
-	else
-	{
-		if (falseBlock != null)
-		{
-			foreach (var op in falseBlock.Execute(ctx))
-			{
-				yield return op;
-			}
-		}
-	}
-}
-```
-
-## Variables
-Variables exist in RPGScript, but are subject to change, so I won't document them yet.
+RPGScript comes with a few built-in commands and expressions, available in the `Framework` class.
 
 ## Comments
 Only single-line comments are featured. Starting with a `'` character, the rest of the line will be commented out.

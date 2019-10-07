@@ -21,14 +21,13 @@ namespace RPGScript
 			sb.Append("\"").Append(_value.Replace("\\", "\\\\").Replace("\"", "\\\"")).Append("\"");
 		}
 
-		public override string ToString()
-		{
-			return _value;
-		}
+        public override string ToString() => _value;
 
 		public override bool IsEqual(Value other)
 		{
 			return ((other is StringValue) && (((StringValue)other)._value == _value));
 		}
-	}
+
+        public override string AsString() =>_value;
+    }
 }

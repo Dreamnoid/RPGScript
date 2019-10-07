@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace RPGScript
@@ -64,7 +63,11 @@ namespace RPGScript
 				{
 					tokens.Enqueue(new Token.At() { Source = source });
 				}
-				else if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
+                else if (c == Syntax.VariablePrefix)
+                {
+                    tokens.Enqueue(new Token.VariablePrefix() { Source = source });
+                }
+                else if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
 				{
 					// Whitespace
 				}
@@ -93,7 +96,7 @@ namespace RPGScript
 					}
 					else
 					{
-						tokens.Enqueue(new Token.Key() { Name = word, Source = source });
+						tokens.Enqueue(new Token.Identifier() { Name = word, Source = source });
 					}
 				}
 			}

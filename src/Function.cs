@@ -3,49 +3,27 @@ using System.Text;
 
 namespace RPGScript
 {
-	public class FunctionContext
-	{
-		public bool BoolFlag;
-		public readonly Table Globals;
-		public readonly API API;
-		public FunctionContext(Table globals, API api)
-		{
-			Globals = globals ?? new Table();
-			API = api;
-		}
-	}
-
 	public class Function : Value
 	{
-		struct Op
+		struct Command
 		{
-			public string Cmd;
+			public string Identifier;
 			public List Args;
 			public override string ToString()
 			{
-				return Cmd;
+				return Identifier;
 			}
 		}
-		private readonly List<Op> _ops = new List<Op>();
+		private readonly List<Command> _commands = new List<Command>();
 
-		public bool Evaluate(FunctionContext ctx)
+		public IEnumerable<object> Execute(Runtime runtime)
 		{
-			foreach (var op in _ops)
+			foreach (var command in _commands)
 			{
-				var cmd = ctx.API.GetCommand(op.Cmd);
-				cmd.Evaluate(op.Args, ctx);
-			}
-			return ctx.BoolFlag;
-		}
-
-		public IEnumerable<object> Execute(FunctionContext ctx)
-		{
-			foreach (var op in _ops)
-			{
-				var cmd = ctx.API.GetCommand(op.Cmd);
-				foreach (var o in cmd.Execute(op.Args, ctx))
+				var cmd = runtime.API.GetCommand(command.Identifier);
+				foreach (var op in cmd(command.Args, runtime))
 				{
-					yield return o;
+					yield return op;
 				}
 			}
 		}
@@ -56,9 +34,9 @@ namespace RPGScript
 			tokens.Dequeue<Token.StartFunction>();
 			while (!tokens.CheckNext<Token.EndFunction>())
 			{
-				var cmd = tokens.Dequeue<Token.Key>();
+				var cmd = tokens.Dequeue<Token.Identifier>();
 				var args = Parser.ParseList(tokens, null);
-				function._ops.Add(new Op() { Cmd = cmd.Name, Args = args });
+				function._commands.Add(new Command() { Identifier = cmd.Name, Args = args });
 			}
 			tokens.Dequeue<Token.EndFunction>();
 			return function;
@@ -67,9 +45,9 @@ namespace RPGScript
 		public override void Write(StringBuilder sb)
 		{
 			sb.Append(Syntax.StartFunction);
-			foreach (var op in _ops)
+			foreach (var op in _commands)
 			{
-				sb.Append(op.Cmd);
+				sb.Append(op.Identifier);
 				op.Args.Write(sb);
 				sb.AppendLine();
 			}
@@ -93,7 +71,7 @@ namespace RPGScript
 
 		public static Function Load(string filename, ISourceProvider provider)
 		{
-			return Function.Parse(Lexer.Parse(filename, provider));
+			return Parse(Lexer.Parse(filename, provider));
 		}
 	}
 }
