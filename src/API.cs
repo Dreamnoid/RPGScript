@@ -11,29 +11,31 @@ namespace RPGScript
 		private readonly Dictionary<string, UserCommand> _commands = new Dictionary<string, UserCommand>();
         private readonly Dictionary<string, UserExpression> _expressions = new Dictionary<string, UserExpression>();
 
-        private static readonly API FrameworkAPI = FromStaticClass(typeof(Framework));
+		private static readonly API FrameworkAPI = new API();
+		static API()
+		{
+			FrameworkAPI.RegisterStaticClass(typeof(Framework));
+		}
 
         public API()
         {
-            Append(FrameworkAPI);
+			Append(FrameworkAPI);
         }
 
-		public static API FromStaticClass(Type type)
+		public void RegisterStaticClass(Type type)
 		{
-			var api = new API();
 			var methods = type.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 			foreach (var method in methods)
 			{
 				if (Delegate.CreateDelegate(typeof(UserCommand), method, false) is UserCommand cmd)
                 {
-                    api.RegisterCommand(method.Name, cmd);
+                    RegisterCommand(method.Name, cmd);
                 }
                 else if (Delegate.CreateDelegate(typeof(UserExpression), method, false) is UserExpression exp)
                 {
-                    api.RegisterExpression(method.Name, exp);
+                    RegisterExpression(method.Name, exp);
                 }
 			}
-			return api;
 		}
 
         public void RegisterCommand(string name, UserCommand cmd)
@@ -66,6 +68,8 @@ namespace RPGScript
 
         public void Append(API api)
 		{
+			if (api == null) return;
+
 			foreach (var kvp in api._commands)
 			{
 				_commands[kvp.Key] = kvp.Value;

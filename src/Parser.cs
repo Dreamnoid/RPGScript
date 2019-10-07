@@ -70,7 +70,15 @@ namespace RPGScript
             while (!tokens.CheckNext<Token.EndList>())
             {
                 expression.Arguments.Add(tokens.DequeueValue(provider));
-            }
+				if (!tokens.CheckNext<Token.Delimiter>())
+				{
+					break;
+				}
+				else
+				{
+					tokens.Dequeue<Token.Delimiter>();
+				}
+			}
             tokens.Dequeue<Token.EndList>();
             return expression;
         }
