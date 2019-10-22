@@ -13,7 +13,7 @@ namespace RPGScript
 
 		public static implicit operator string(StringValue v)
 		{
-			return (v != null) ? v._value : null;
+			return v?._value;
 		}
 
 		public override void Write(StringBuilder sb)
@@ -25,7 +25,7 @@ namespace RPGScript
 
 		public override bool IsEqual(Value other)
 		{
-			return ((other is StringValue) && (((StringValue)other)._value == _value));
+			return ((other is StringValue value) && (value._value == _value));
 		}
 
         public override string AsString() =>_value;

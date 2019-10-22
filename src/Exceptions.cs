@@ -9,6 +9,6 @@ namespace RPGScript
 
 	public class ParserScriptException : Exception
 	{
-		public ParserScriptException(string msg, Source source) : base(string.Format("Syntax error: {0} ({1} line {2})", msg, source.File, source.Line)) { }
+		public ParserScriptException(string msg, Source source) : base($"Syntax error: {msg} ({source.File} line {source.Line})") { }
 	}
 }

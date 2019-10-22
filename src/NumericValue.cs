@@ -58,7 +58,7 @@ namespace RPGScript
 
 		public override bool IsEqual(Value other)
 		{
-			return ((other is NumericValue) && (((NumericValue)other)._value == _value));
+			return ((other is NumericValue value) && (value._value == _value));
 		}
 
         public override bool AsBool() => (_value > 0);

@@ -29,7 +29,7 @@ namespace RPGScript
 
 		public static Value Include(List args, Preprocessor preprocessor)
 		{
-			return Table.Load(args.GetValue(0).AsString(), preprocessor);
+			return Value.Load(args.GetValue(0).AsString(), preprocessor);
 		}
 	}
 }
