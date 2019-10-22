@@ -104,3 +104,12 @@ RPGScript comes with a few built-in commands and expressions, available in the `
 
 ## Comments
 Only single-line comments are featured. Starting with a `'` character, the rest of the line will be commented out.
+
+## Preprocessor
+It is possible to provide user-defined expressions that are evaluated during the parsing of the document, acting like preprocessor macro. They always start with the `#` prefix:
+``` C
+[
+	Characters = #Include("characters.rpgs")
+]
+```
+`#Include` is a built-in command that will parse a different file and 'paste' the value in-place of the preprocessor macro.
