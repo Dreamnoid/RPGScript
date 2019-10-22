@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace RPGScript
@@ -29,20 +28,6 @@ namespace RPGScript
 			}
 		}
 
-		internal static Function Parse(Queue<Token> tokens, Preprocessor preprocessor)
-		{
-			var function = new Function();
-			tokens.Dequeue<Token.StartFunction>();
-			while (!tokens.CheckNext<Token.EndFunction>())
-			{
-				var cmd = tokens.Dequeue<Token.Identifier>();
-				var args = Parser.ParseList(tokens, preprocessor);
-				function._commands.Add(new Command() { Identifier = cmd.Name, Args = args });
-			}
-			tokens.Dequeue<Token.EndFunction>();
-			return function;
-		}
-
 		public override void Write(StringBuilder sb)
 		{
 			sb.Append(Syntax.StartFunction);
@@ -60,14 +45,9 @@ namespace RPGScript
 			return (this == other);
 		}
 
-		public static Function Load(string filename, string fullScript, Preprocessor preprocessor)
-		{
-			return Parse(Lexer.Parse(fullScript, filename), preprocessor);
-		}
-
-		public static Function Load(string filename, Preprocessor preprocessor)
-		{
-			return Load(filename, File.ReadAllText(filename), preprocessor);
-		}
-	}
+        internal void AddCommand(string identifier, List args)
+        {
+            _commands.Add(new Command() { Identifier = identifier, Args = args });
+        }
+    }
 }

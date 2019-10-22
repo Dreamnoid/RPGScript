@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace RPGScript
@@ -151,22 +150,5 @@ namespace RPGScript
 				_values[kvp.Key] = kvp.Value;
 			}
 		}
-
-		public static Table Load(string filename, Preprocessor preprocessor)
-		{
-			return Load(filename, File.ReadAllText(filename), preprocessor);
-		}
-
-		public static Table Load(string filename, string fullScript, Preprocessor preprocessor)
-		{
-			return Parser.ParseTable(Lexer.Parse(fullScript, filename), preprocessor);
-		}
-
-		public void Save(string filename)
-		{
-			var sb = new StringBuilder();
-			Write(sb);
-			File.WriteAllText(filename, sb.ToString());
-		}
-	}
+    }
 }

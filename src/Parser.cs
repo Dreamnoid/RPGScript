@@ -18,16 +18,15 @@ namespace RPGScript
 			}
 			else if (tokens.CheckNext<Token.StartTable>())
 			{
-				return ParseTable(tokens, preprocessor);
+				return tokens.DequeueTable(preprocessor);
 			}
 			else if (tokens.CheckNext<Token.StartList>())
 			{
-				return ParseList(tokens, preprocessor);
+				return tokens.DequeueList(preprocessor);
 			}
 			else if (tokens.CheckNext<Token.StartFunction>())
-			{
-				var value = Function.Parse(tokens, preprocessor);
-				return value;
+            {
+                return tokens.DequeueFunction(preprocessor);
 			}
 			else if (tokens.CheckNext<Token.VariablePrefix>())
 			{
@@ -65,7 +64,7 @@ namespace RPGScript
 			}
 			else if (tokens.CheckNext<Token.Identifier>())
 			{
-				return ParseExpression(tokens, preprocessor);
+				return DequeueExpression(tokens, preprocessor);
 			}
 			else
 			{
@@ -74,7 +73,7 @@ namespace RPGScript
 			}
 		}
 
-        private static Expression ParseExpression(Queue<Token> tokens, Preprocessor preprocessor)
+        private static Expression DequeueExpression(this Queue<Token> tokens, Preprocessor preprocessor)
         {
             var identifier = tokens.Dequeue<Token.Identifier>();
             var expression = new Expression(identifier.Name);
@@ -95,7 +94,7 @@ namespace RPGScript
             return expression;
         }
 
-        public static Table ParseTable(Queue<Token> tokens, Preprocessor preprocessor)
+        private static Table DequeueTable(this Queue<Token> tokens, Preprocessor preprocessor)
 		{
 			var table = new Table();
 			tokens.Dequeue<Token.StartTable>();
@@ -117,7 +116,7 @@ namespace RPGScript
 			return table;
 		}
 
-		public static List ParseList(Queue<Token> tokens, Preprocessor preprocessor)
+        private static List DequeueList(this Queue<Token> tokens, Preprocessor preprocessor)
 		{
 			var list = new List();
 			tokens.Dequeue<Token.StartList>();
@@ -137,27 +136,37 @@ namespace RPGScript
 			return list;
 		}
 
-		public static TToken Dequeue<TToken>(this Queue<Token> tokens) where TToken : Token
-		{
-			if (tokens.Count > 0)
-			{
-				var token = tokens.Dequeue();
-				if (!(token is TToken))
-				{
-					throw new ParserScriptException(string.Format("Expected {0}, received '{1}'", typeof(TToken).Name, token.ToString()), token.Source);
-				}
-				return ((TToken)token);
-			}
-			else
-			{
-				throw new ParserScriptException(string.Format("Expected {0}, received EOF", typeof(TToken).Name), new Source());
-			}
-		}
+        private static Function DequeueFunction(this Queue<Token> tokens, Preprocessor preprocessor)
+        {
+            var function = new Function();
+            tokens.Dequeue<Token.StartFunction>();
+            while (!tokens.CheckNext<Token.EndFunction>())
+            {
+                var cmd = tokens.Dequeue<Token.Identifier>();
+                var args = DequeueList(tokens, preprocessor);
+                function.AddCommand(cmd.Name, args);
+            }
+            tokens.Dequeue<Token.EndFunction>();
+            return function;
+        }
 
-		public static bool CheckNext<TToken>(this Queue<Token> tokens) where TToken : Token
+        private static TToken Dequeue<TToken>(this Queue<Token> tokens) where TToken : Token
+        {
+            if (tokens.Count <= 0)
+                throw new ParserScriptException($"Expected {typeof(TToken).Name}, received EOF", new Source());
+
+            var token = tokens.Dequeue();
+            if (!(token is TToken))
+            {
+                throw new ParserScriptException($"Expected {typeof(TToken).Name}, received '{token}'", token.Source);
+            }
+
+            return (TToken) token;
+        }
+
+        private static bool CheckNext<TToken>(this Queue<Token> tokens) where TToken : Token
 		{
-			var token = tokens.Peek();
-			return (token is TToken);
+			return (tokens.Peek() is TToken);
 		}
 	}
 }
