@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace RPGScript
@@ -80,7 +81,7 @@ namespace RPGScript
 				}
 				else if (char.IsDigit(c) || c == '+' || c == '-')
 				{
-					tokens.Enqueue(new Token.Number() { Value = double.Parse(c + ReadDigits(chars)), Source = source });
+					tokens.Enqueue(new Token.Number() { Value = double.Parse(c + ReadDigits(chars), CultureInfo.InvariantCulture), Source = source });
 				}
 				else
 				{
