@@ -45,7 +45,7 @@ namespace RPGScript
 			return (this == other);
 		}
 
-        internal void AddCommand(string identifier, List args)
+        public void AddCommand(string identifier, List args)
         {
             _commands.Add(new Command() { Identifier = identifier, Args = args });
         }
