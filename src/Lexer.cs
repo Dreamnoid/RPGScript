@@ -118,7 +118,7 @@ namespace RPGScript
 		private static string ReadLettersOrDigits(SourceQueue characters)
 		{
 			var buffer = new StringBuilder();
-			while (characters.Any() && char.IsLetterOrDigit(characters.Peek()))
+			while (characters.Any() && (char.IsLetterOrDigit(characters.Peek()) || (characters.Peek() == '_')))
 			{
 				buffer.Append(characters.Dequeue());
 			}
