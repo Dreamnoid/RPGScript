@@ -18,15 +18,9 @@ namespace RPGScript
 			return value;
 		}
 
-		public Table GetTable(int index)
-		{
-			return GetValue(index) as Table;
-		}
+		public Table GetTable(int index) => GetValue(index) as Table;
 
-		public List GetList(int index)
-		{
-			return GetValue(index) as List;
-		}
+		public List GetList(int index) => GetValue(index) as List;
 
 		public int GetInt(int index, int def)
 		{
@@ -48,7 +42,9 @@ namespace RPGScript
 			return (GetValue(index) is NumericValue value) ? value : def;
 		}
 
-		public Value GetValue(int index)
+        public Function GetFunction(int index) => GetValue(index) as Function;
+
+        public Value GetValue(int index)
 		{
 			if (index >= 0 && index < _values.Count)
 			{
@@ -78,19 +74,22 @@ namespace RPGScript
 			sb.Append(Syntax.EndList);
 		}
 
-		public override bool IsEqual(Value other)
-		{
-			return (this == other);
-		}
+        public override bool IsEqual(Value other) => (this == other);
 
-		public IEnumerator<Value> GetEnumerator()
-		{
-			return _values.GetEnumerator();
-		}
+        public List<Value>.Enumerator GetEnumerator() =>  _values.GetEnumerator();
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return _values.GetEnumerator();
-		}
-	}
+        IEnumerator<Value> IEnumerable<Value>.GetEnumerator() => _values.GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => _values.GetEnumerator();
+
+        public override Value Evaluate(Runtime runtime)
+        {
+            var list = new List();
+            foreach (var item in this)
+            {
+                list.Add(item.Evaluate(runtime));
+            }
+            return list;
+        }
+    }
 }

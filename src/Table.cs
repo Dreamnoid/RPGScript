@@ -4,17 +4,17 @@ using System.Text;
 namespace RPGScript
 {
 	public class Table : Value
-	{
+    {
 		private readonly Dictionary<string, Value> _values = new Dictionary<string, Value>();
 
-		public IEnumerable<string> Keys => _values.Keys;
+		public Dictionary<string, Value>.KeyCollection Keys => _values.Keys;
 
 		#region Set
 
 		public void Set(string key, int value)
 		{
-			_values[key] = new NumericValue(value);
-		}
+            _values[key] = new NumericValue(value);
+        }
 
 		public void Set(string key, double value)
 		{
@@ -48,11 +48,11 @@ namespace RPGScript
 			_values[key] = value;
 		}
 
-		#endregion
+        #endregion
 
-		#region Get
+        #region Get
 
-		public int GetInt(string key, int def)
+        public int GetInt(string key, int def)
 		{
 			return (GetValue(key) is NumericValue value) ? value : def;
 		}
@@ -78,10 +78,7 @@ namespace RPGScript
 			return (GetValue(key) is NumericValue value) ? value : def;
 		}
 
-		public Table GetTable(string key)
-		{
-			return GetValue(key) as Table;
-		}
+		public Table GetTable(string key) => GetValue(key) as Table;
 
 		public Table GetOrCreateTable(string key)
 		{
@@ -91,15 +88,9 @@ namespace RPGScript
 			return table;
 		}
 
-		public Function GetFunction(string key)
-		{
-			return GetValue(key) as Function;
-		}
+		public Function GetFunction(string key) => GetValue(key) as Function;
 
-		public List GetList(string key)
-		{
-			return GetValue(key) as List;
-		}
+		public List GetList(string key) => GetValue(key) as List;
 
 		public List GetOrCreateList(string key)
 		{
@@ -118,9 +109,9 @@ namespace RPGScript
 			return null;
 		}
 
-		#endregion
+        #endregion
 
-		public override void Write(StringBuilder sb)
+        public override void Write(StringBuilder sb)
 		{
 			sb.Append(Syntax.StartTable);
 			int i = 0;
@@ -138,17 +129,24 @@ namespace RPGScript
 			sb.Append(Syntax.EndTable);
 		}
 
-		public override bool IsEqual(Value other)
-		{
-			return (this == other);
-		}
+        public override bool IsEqual(Value other) => (this == other);
 
-		public void Append(Table table)
+        public void Append(Table table)
 		{
 			foreach (var kvp in table._values)
 			{
 				_values[kvp.Key] = kvp.Value;
 			}
 		}
+
+        public override Value Evaluate(Runtime runtime)
+        {
+            var table = new Table();
+            foreach (var kvp in _values)
+            {
+                table.Set(kvp.Key, kvp.Value.Evaluate(runtime));
+            }
+            return table;
+        }
     }
 }
